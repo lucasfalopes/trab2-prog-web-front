@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "es6",
+    "lib": ["DOM", "ES2016"],
     "rootDir": "./src",
     "outDir": "./dist",
     "esModuleInterop": true,
