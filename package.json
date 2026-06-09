@@ -1,0 +1,12 @@
+{
+  "name": "trab2-prog-web-front",
+  "version": "1.0.0",
+  "description": "Frontend do Sistema de Gerenciamento de Ativos e Dispositivos Hospitalares",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
