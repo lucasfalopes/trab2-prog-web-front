@@ -139,3 +139,34 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   font-size: 0.9rem;
 }
+
+/* Toast notifications */
+#toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--white);
+  min-width: 240px;
+  max-width: 360px;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: var(--shadow);
+}
+
+.toast--visible { opacity: 1; transform: translateX(0); }
+.toast--success { background-color: var(--success); }
+.toast--error   { background-color: var(--danger); }
+.toast--info    { background-color: var(--primary-blue); }

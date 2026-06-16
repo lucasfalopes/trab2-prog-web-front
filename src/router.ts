@@ -2,7 +2,7 @@ import { isAuthenticated, getRole } from './auth.js';
 
 export function requireAuth(): void {
   if (!isAuthenticated()) {
-    window.location.href = '/login.html';
+    window.location.href = 'index.html';
   }
 }
 

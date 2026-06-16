@@ -1,4 +1,5 @@
-const TOKEN_KEY = 'auth_token';
+const TOKEN_KEY = 'access_token';
+const REFRESH_KEY = 'refresh_token';
 const ROLE_KEY = 'user_role';
 const USERNAME_KEY = 'username';
 
@@ -20,21 +21,23 @@ export function isAuthenticated(): boolean {
   return !!getToken();
 }
 
-export function saveAuth(token: string, role: string, username: string): void {
+export function saveAuth(token: string, refresh: string, role: string, username: string): void {
   localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(REFRESH_KEY, refresh);
   localStorage.setItem(ROLE_KEY, role);
   localStorage.setItem(USERNAME_KEY, username);
 }
 
 export function clearAuth(): void {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_KEY);
   localStorage.removeItem(ROLE_KEY);
   localStorage.removeItem(USERNAME_KEY);
 }
 
 export function logout(): void {
   clearAuth();
-  window.location.href = '/login.html';
+  window.location.href = 'index.html';
 }
 
 export function authHeaders(): Record<string, string> {
