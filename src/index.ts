@@ -174,3 +174,30 @@ if (logoutBtn) {
         window.location.href = "index.html";
     });
 }
+
+// ==========================================
+// DEVICES LOGIC (TASK 9)
+// ==========================================
+export interface Device {
+    id: number;
+    name: string;
+    device_type: string;
+    status: string;
+    location: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export async function fetchDevices(): Promise<Device[]> {
+    const token = localStorage.getItem("access_token");
+    const response = await fetch("http://localhost:8000/api/devices/", {
+        headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    if (!response.ok) {
+        throw new Error("Erro ao buscar dispositivos");
+    }
+    
+    const data = await response.json();
+    return data.results ? data.results : data;
+}
