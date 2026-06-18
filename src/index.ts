@@ -201,3 +201,62 @@ export async function fetchDevices(): Promise<Device[]> {
     const data = await response.json();
     return data.results ? data.results : data;
 }
+
+// ==========================================
+// RENDER DEVICES (TASK 10)
+// ==========================================
+export async function renderDevices() {
+    const medicalTbody = document.getElementById("devices-tbody");
+    const adminTbody = document.getElementById("admin-devices-tbody");
+    
+    if (!medicalTbody && !adminTbody) return;
+    
+    try {
+        const devices = await fetchDevices();
+        
+        if (medicalTbody) {
+            medicalTbody.innerHTML = "";
+            devices.forEach((device: Device) => {
+                let badgeClass = "badge-available";
+                if (device.status === "Em uso" || device.status === "IN_USE") badgeClass = "badge-inuse";
+                if (device.status === "Manutenção" || device.status === "MAINTENANCE") badgeClass = "badge-maintenance";
+                
+                medicalTbody.innerHTML += `
+                    <tr>
+                        <td>${device.name}</td>
+                        <td>${device.device_type}</td>
+                        <td><span class="badge ${badgeClass}">${device.status}</span></td>
+                        <td>${device.location}</td>
+                    </tr>
+                `;
+            });
+        }
+        
+        if (adminTbody) {
+            adminTbody.innerHTML = "";
+            devices.forEach((device: Device) => {
+                let badgeClass = "badge-available";
+                if (device.status === "Em uso" || device.status === "IN_USE") badgeClass = "badge-inuse";
+                if (device.status === "Manutenção" || device.status === "MAINTENANCE") badgeClass = "badge-maintenance";
+                
+                adminTbody.innerHTML += `
+                    <tr>
+                        <td>${device.name}</td>
+                        <td>${device.device_type}</td>
+                        <td><span class="badge ${badgeClass}">${device.status}</span></td>
+                        <td>${device.location}</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" style="margin-right: 0.5rem;">Editar</button>
+                            <button class="btn btn-sm btn-danger">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    } catch (error) {
+        if (medicalTbody) medicalTbody.innerHTML = '<tr><td colspan="4">Erro ao carregar dispositivos.</td></tr>';
+        if (adminTbody) adminTbody.innerHTML = '<tr><td colspan="5">Erro ao carregar dispositivos.</td></tr>';
+    }
+}
+
+renderDevices();
