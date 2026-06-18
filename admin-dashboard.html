@@ -63,6 +63,24 @@
                 <!-- Linhas preenchidas via TS -->
             </tbody>
         </table>
+        
+        <h3 style="margin-top: 3rem;">Gestão de Dispositivos</h3>
+        <button id="add-device-btn" class="btn btn-primary" style="margin-bottom: 1rem;">Adicionar Dispositivo</button>
+        <table class="shadow" style="border-radius: var(--border-radius); overflow: hidden;">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th>Localização</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="admin-devices-tbody">
+                <!-- Preenchido via TS na próxima tarefa -->
+                <tr><td colspan="5" style="text-align: center;">Carregando dispositivos...</td></tr>
+            </tbody>
+        </table>
     </main>
     <script type="module" src="./dist/index.js"></script>
 </body>

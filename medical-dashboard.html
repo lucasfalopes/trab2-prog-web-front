@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Médico - Sistema Hospitalar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./src/styles/global.css">
+    <style>
+        .dashboard-header { background-color: var(--primary-blue); color: var(--white); padding: 1rem 0; }
+        .dashboard-header .container { display: flex; justify-content: space-between; align-items: center; }
+        .dashboard-content { padding: 2rem 0; }
+        table { width: 100%; border-collapse: collapse; background: var(--white); margin-top: 1rem; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; font-weight: 500; }
+        .badge-available { background-color: var(--success); color: white; }
+        .badge-inuse { background-color: var(--warning); color: black; }
+        .badge-maintenance { background-color: var(--danger); color: white; }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="container">
+            <h2>Painel da Equipe Clínica</h2>
+            <button id="logout-btn" class="btn btn-sm" style="background: transparent; border: 1px solid white; color: white;">Sair</button>
+        </div>
+    </header>
+    <main class="container dashboard-content">
+        <h3>Dispositivos Hospitalares</h3>
+        <p>Acompanhamento em tempo real dos equipamentos.</p>
+        <table class="shadow" style="border-radius: var(--border-radius); overflow: hidden;">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th>Localização</th>
+                </tr>
+            </thead>
+            <tbody id="devices-tbody">
+                <!-- Preenchido via TS na próxima tarefa -->
+                <tr><td colspan="4">Carregando dispositivos...</td></tr>
+            </tbody>
+        </table>
+    </main>
+    <script type="module" src="./dist/index.js"></script>
+</body>
+</html>
