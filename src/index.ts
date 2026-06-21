@@ -1,3 +1,5 @@
+import { requireAdmin, requireClinical } from './router.js';
+
 const loginForm = document.getElementById("login-form") as HTMLFormElement;
 
 if (loginForm) {
@@ -114,6 +116,7 @@ if (forceChangePasswordForm) {
 // ==========================================
 const resetRequestsTbody = document.getElementById("reset-requests-tbody");
 if (resetRequestsTbody) {
+    requireAdmin();
     const fetchRequests = async () => {
         const token = localStorage.getItem("access_token");
         try {
@@ -188,16 +191,18 @@ export interface Device {
     updated_at: string;
 }
 
-export async function fetchDevices(): Promise<Device[]> {
+export async function fetchDevices(status?: string): Promise<Device[]> {
     const token = localStorage.getItem("access_token");
-    const response = await fetch("http://localhost:8000/api/devices/", {
+    const url = new URL("http://localhost:8000/api/devices/");
+    if (status) url.searchParams.set("status", status);
+    const response = await fetch(url.toString(), {
         headers: { "Authorization": `Bearer ${token}` }
     });
-    
+
     if (!response.ok) {
         throw new Error("Erro ao buscar dispositivos");
     }
-    
+
     const data = await response.json();
     return data.results ? data.results : data;
 }
@@ -205,14 +210,16 @@ export async function fetchDevices(): Promise<Device[]> {
 // ==========================================
 // RENDER DEVICES (TASK 10)
 // ==========================================
-export async function renderDevices() {
+const deviceMap = new Map<number, Device>();
+
+export async function renderDevices(statusFilter?: string) {
     const medicalTbody = document.getElementById("devices-tbody");
     const adminTbody = document.getElementById("admin-devices-tbody");
-    
+
     if (!medicalTbody && !adminTbody) return;
-    
+
     try {
-        const devices = await fetchDevices();
+        const devices = await fetchDevices(statusFilter);
         
         if (medicalTbody) {
             medicalTbody.innerHTML = "";
@@ -234,11 +241,12 @@ export async function renderDevices() {
         
         if (adminTbody) {
             adminTbody.innerHTML = "";
+            deviceMap.clear();
             devices.forEach((device: Device) => {
                 let badgeClass = "badge-available";
                 if (device.status === "Em uso" || device.status === "IN_USE") badgeClass = "badge-inuse";
                 if (device.status === "Manutenção" || device.status === "MAINTENANCE") badgeClass = "badge-maintenance";
-                
+                deviceMap.set(device.id, device);
                 adminTbody.innerHTML += `
                     <tr>
                         <td>${device.name}</td>
@@ -246,8 +254,8 @@ export async function renderDevices() {
                         <td><span class="badge ${badgeClass}">${device.status}</span></td>
                         <td>${device.location}</td>
                         <td>
-                            <button class="btn btn-sm btn-success" style="margin-right: 0.5rem;">Editar</button>
-                            <button class="btn btn-sm btn-danger">Excluir</button>
+                            <button class="btn btn-sm btn-success" style="margin-right: 0.5rem;" onclick="openEditModal(${device.id})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDevice(${device.id})">Excluir</button>
                         </td>
                     </tr>
                 `;
@@ -257,6 +265,121 @@ export async function renderDevices() {
         if (medicalTbody) medicalTbody.innerHTML = '<tr><td colspan="4">Erro ao carregar dispositivos.</td></tr>';
         if (adminTbody) adminTbody.innerHTML = '<tr><td colspan="5">Erro ao carregar dispositivos.</td></tr>';
     }
+}
+
+// ==========================================
+// EDIT MODAL LOGIC
+// ==========================================
+const editModal     = document.getElementById("edit-modal") as HTMLElement | null;
+const editForm      = document.getElementById("edit-device-form") as HTMLFormElement | null;
+const editCancelBtn = document.getElementById("edit-cancel-btn") as HTMLButtonElement | null;
+
+if (editModal && editForm && editCancelBtn) {
+    editCancelBtn.addEventListener("click", () => {
+        editModal.style.display = "none";
+    });
+
+    editModal.addEventListener("click", (e) => {
+        if (e.target === editModal) editModal.style.display = "none";
+    });
+
+    editForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id       = (document.getElementById("edit-device-id") as HTMLInputElement).value;
+        const name     = (document.getElementById("edit-name") as HTMLInputElement).value.trim();
+        const device_type = (document.getElementById("edit-type") as HTMLInputElement).value.trim();
+        const status   = (document.getElementById("edit-status") as HTMLSelectElement).value;
+        const location = (document.getElementById("edit-location") as HTMLInputElement).value.trim();
+
+        const token = localStorage.getItem("access_token");
+        try {
+            const response = await fetch(`http://localhost:8000/api/devices/${id}/`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ name, device_type, status, location })
+            });
+
+            if (response.status === 401) {
+                alert("Sessão expirada. Faça login novamente.");
+                localStorage.clear();
+                window.location.href = "index.html";
+                return;
+            }
+
+            if (!response.ok) {
+                const data = await response.json();
+                alert("Erro ao salvar: " + (data?.detail ?? JSON.stringify(data)));
+                return;
+            }
+
+            editModal.style.display = "none";
+            alert("Dispositivo atualizado com sucesso!");
+            renderDevices();
+        } catch {
+            alert("Falha de conexão com o servidor.");
+        }
+    });
+}
+
+(window as any).openEditModal = (id: number) => {
+    const device = deviceMap.get(id);
+    if (!device || !editModal) return;
+    (document.getElementById("edit-device-id") as HTMLInputElement).value = String(device.id);
+    (document.getElementById("edit-name") as HTMLInputElement).value = device.name;
+    (document.getElementById("edit-type") as HTMLInputElement).value = device.device_type;
+    (document.getElementById("edit-status") as HTMLSelectElement).value = device.status;
+    (document.getElementById("edit-location") as HTMLInputElement).value = device.location;
+    editModal.style.display = "flex";
+};
+
+// ==========================================
+// DELETE DEVICE LOGIC
+// ==========================================
+(window as any).deleteDevice = async (id: number) => {
+    if (!confirm("Tem certeza que deseja excluir este dispositivo? Esta ação não pode ser desfeita.")) return;
+
+    const token = localStorage.getItem("access_token");
+    try {
+        const response = await fetch(`http://localhost:8000/api/devices/${id}/`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (response.status === 401) {
+            alert("Sessão expirada. Faça login novamente.");
+            localStorage.clear();
+            window.location.href = "index.html";
+            return;
+        }
+
+        if (response.status === 403) {
+            alert("Você não tem permissão para excluir este dispositivo.");
+            return;
+        }
+
+        if (!response.ok) {
+            alert("Erro ao excluir dispositivo.");
+            return;
+        }
+
+        alert("Dispositivo excluído com sucesso!");
+        renderDevices();
+    } catch {
+        alert("Falha de conexão com o servidor.");
+    }
+};
+
+if (document.getElementById("devices-tbody")) requireClinical();
+if (document.getElementById("admin-devices-tbody")) requireAdmin();
+
+const statusFilter = document.getElementById("status-filter") as HTMLSelectElement | null;
+if (statusFilter) {
+    statusFilter.addEventListener("change", () => {
+        renderDevices(statusFilter.value || undefined);
+    });
 }
 
 renderDevices();

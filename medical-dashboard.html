@@ -29,6 +29,15 @@
     <main class="container dashboard-content">
         <h3>Dispositivos Hospitalares</h3>
         <p>Acompanhamento em tempo real dos equipamentos.</p>
+        <div style="margin-bottom: 1rem;">
+            <label for="status-filter">Filtrar por status:</label>
+            <select id="status-filter" style="display:inline-block; width:auto; margin-left:0.5rem; padding:0.375rem 0.75rem; border:1px solid #ced4da; border-radius:4px;">
+                <option value="">Todos</option>
+                <option value="Disponível">Disponível</option>
+                <option value="Em uso">Em uso</option>
+                <option value="Manutenção">Manutenção</option>
+            </select>
+        </div>
         <table class="shadow" style="border-radius: var(--border-radius); overflow: hidden;">
             <thead>
                 <tr>
