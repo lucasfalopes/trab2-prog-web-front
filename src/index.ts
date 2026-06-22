@@ -1,4 +1,5 @@
 import { requireAdmin, requireClinical } from './router.js';
+import { showToast } from './toast.js';
 
 const loginForm = document.getElementById("login-form") as HTMLFormElement;
 
@@ -41,11 +42,11 @@ if (loginForm) {
                 
             } else {
                 const errorData = await response.json();
-                alert("Erro ao fazer login: " + (errorData.detail || "Credenciais inválidas."));
+                showToast("Erro ao fazer login: " + (errorData.detail || "Credenciais inválidas."), 'error');
             }
         } catch (error) {
             console.error("Erro na requisição:", error);
-            alert("Erro de conexão com o servidor. Verifique se o backend está rodando.");
+            showToast("Erro de conexão com o servidor.", 'error');
         }
     });
 }
@@ -65,13 +66,13 @@ if (forgotPasswordForm) {
                 body: JSON.stringify({ email: emailInput.value })
             });
             if (response.ok) {
-                alert("Sua solicitação foi enviada aos administradores.");
-                window.location.href = "index.html";
+                showToast("Sua solicitação foi enviada aos administradores.", 'success');
+                setTimeout(() => { window.location.href = "index.html"; }, 1500);
             } else {
-                alert("Erro ao enviar solicitação.");
+                showToast("Erro ao enviar solicitação.", 'error');
             }
         } catch (error) {
-            alert("Erro de conexão.");
+            showToast("Erro de conexão.", 'error');
         }
     });
 }
@@ -98,15 +99,17 @@ if (forceChangePasswordForm) {
             });
             
             if (response.ok) {
-                alert("Senha alterada com sucesso!");
+                showToast("Senha alterada com sucesso!", 'success');
                 const role = localStorage.getItem("user_role");
-                window.location.href = role === "ADMIN" ? "admin-dashboard.html" : "medical-dashboard.html";
+                setTimeout(() => {
+                    window.location.href = role === "ADMIN" ? "admin-dashboard.html" : "medical-dashboard.html";
+                }, 1500);
             } else {
                 const data = await response.json();
-                alert("Erro ao alterar senha: " + JSON.stringify(data));
+                showToast("Erro ao alterar senha: " + (data?.detail ?? "Verifique os dados."), 'error');
             }
         } catch (error) {
-            alert("Erro de conexão.");
+            showToast("Erro de conexão.", 'error');
         }
     });
 }
@@ -157,13 +160,13 @@ if (resetRequestsTbody) {
         const data = await response.json();
         if (response.ok) {
             if (action === "APPROVE") {
-                alert(`Solicitação Aprovada!\n\nSenha Temporária Gerada: ${data.temporary_password}\n\nCopie essa senha e entregue manualmente ao usuário.`);
+                showToast(`Aprovado! Senha temporária: ${data.temporary_password}`, 'success', 12000);
             } else {
-                alert("Solicitação Recusada e removida com sucesso.");
+                showToast("Solicitação recusada com sucesso.", 'info');
             }
-            fetchRequests(); // Atualiza a lista
+            fetchRequests();
         } else {
-            alert("Erro: " + JSON.stringify(data));
+            showToast("Erro: " + (data?.detail ?? JSON.stringify(data)), 'error');
         }
     };
 
@@ -303,23 +306,22 @@ if (editModal && editForm && editCancelBtn) {
             });
 
             if (response.status === 401) {
-                alert("Sessão expirada. Faça login novamente.");
-                localStorage.clear();
-                window.location.href = "index.html";
+                showToast("Sessão expirada. Faça login novamente.", 'error');
+                setTimeout(() => { localStorage.clear(); window.location.href = "index.html"; }, 1500);
                 return;
             }
 
             if (!response.ok) {
                 const data = await response.json();
-                alert("Erro ao salvar: " + (data?.detail ?? JSON.stringify(data)));
+                showToast("Erro ao salvar: " + (data?.detail ?? "Verifique os campos."), 'error');
                 return;
             }
 
             editModal.style.display = "none";
-            alert("Dispositivo atualizado com sucesso!");
+            showToast("Dispositivo atualizado com sucesso!", 'success');
             renderDevices();
         } catch {
-            alert("Falha de conexão com o servidor.");
+            showToast("Falha de conexão com o servidor.", 'error');
         }
     });
 }
@@ -349,26 +351,25 @@ if (editModal && editForm && editCancelBtn) {
         });
 
         if (response.status === 401) {
-            alert("Sessão expirada. Faça login novamente.");
-            localStorage.clear();
-            window.location.href = "index.html";
+            showToast("Sessão expirada. Faça login novamente.", 'error');
+            setTimeout(() => { localStorage.clear(); window.location.href = "index.html"; }, 1500);
             return;
         }
 
         if (response.status === 403) {
-            alert("Você não tem permissão para excluir este dispositivo.");
+            showToast("Você não tem permissão para excluir este dispositivo.", 'error');
             return;
         }
 
         if (!response.ok) {
-            alert("Erro ao excluir dispositivo.");
+            showToast("Erro ao excluir dispositivo.", 'error');
             return;
         }
 
-        alert("Dispositivo excluído com sucesso!");
+        showToast("Dispositivo excluído com sucesso!", 'success');
         renderDevices();
     } catch {
-        alert("Falha de conexão com o servidor.");
+        showToast("Falha de conexão com o servidor.", 'error');
     }
 };
 
