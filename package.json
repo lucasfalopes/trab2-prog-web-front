@@ -4,7 +4,8 @@
   "description": "Frontend do Sistema de Gerenciamento de Ativos e Dispositivos Hospitalares",
   "scripts": {
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "start": "npx http-server -c-1 -p 3000"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

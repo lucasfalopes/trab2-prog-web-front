@@ -1,94 +1,99 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { requireAdmin, requireClinical } from './router.js';
-
+import { showToast } from './toast.js';
 const loginForm = document.getElementById("login-form");
-
 if (loginForm) {
-    loginForm.addEventListener("submit", async (e) => {
+    loginForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
         e.preventDefault();
-
         const usernameInput = document.getElementById("username");
         const passwordInput = document.getElementById("password");
-
         const username = usernameInput.value;
         const password = passwordInput.value;
-
         try {
-            const response = await fetch("http://localhost:8000/api/token/", {
+            const response = yield fetch("http://localhost:8000/api/token/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ username, password })
             });
-
             if (response.ok) {
-                const data = await response.json();
-                
+                const data = yield response.json();
                 // Salvar dados no localStorage
                 localStorage.setItem("access_token", data.access);
                 localStorage.setItem("refresh_token", data.refresh);
                 localStorage.setItem("user_role", data.role);
                 localStorage.setItem("username", data.username);
-                
                 // Redirecionar usuário dependendo da flag must_change_password
                 if (data.must_change_password) {
                     window.location.href = "force-change-password.html";
-                } else if (data.role === "ADMIN") {
+                }
+                else if (data.role === "ADMIN") {
                     window.location.href = "admin-dashboard.html";
-                } else {
+                }
+                else {
                     window.location.href = "medical-dashboard.html";
                 }
-                
-            } else {
-                const errorData = await response.json();
-                alert("Erro ao fazer login: " + (errorData.detail || "Credenciais inválidas."));
             }
-        } catch (error) {
-            console.error("Erro na requisição:", error);
-            alert("Erro de conexão com o servidor. Verifique se o backend está rodando.");
+            else {
+                const errorData = yield response.json();
+                showToast("Erro ao fazer login: " + (errorData.detail || "Credenciais inválidas."), 'error');
+            }
         }
-    });
+        catch (error) {
+            console.error("Erro na requisição:", error);
+            showToast("Erro de conexão com o servidor.", 'error');
+        }
+    }));
 }
-
 // ==========================================
 // FORGOT PASSWORD LOGIC
 // ==========================================
 const forgotPasswordForm = document.getElementById("forgot-password-form");
 if (forgotPasswordForm) {
-    forgotPasswordForm.addEventListener("submit", async (e) => {
+    forgotPasswordForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
         e.preventDefault();
         const emailInput = document.getElementById("email");
         try {
-            const response = await fetch("http://localhost:8000/api/users/reset-request/", {
+            const response = yield fetch("http://localhost:8000/api/users/reset-request/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: emailInput.value })
             });
             if (response.ok) {
-                alert("Sua solicitação foi enviada aos administradores.");
-                window.location.href = "index.html";
-            } else {
-                alert("Erro ao enviar solicitação.");
+                showToast("Sua solicitação foi enviada aos administradores.", 'success');
+                setTimeout(() => { window.location.href = "index.html"; }, 1500);
             }
-        } catch (error) {
-            alert("Erro de conexão.");
+            else {
+                showToast("Erro ao enviar solicitação.", 'error');
+            }
         }
-    });
+        catch (error) {
+            showToast("Erro de conexão.", 'error');
+        }
+    }));
 }
-
 // ==========================================
 // FORCE CHANGE PASSWORD LOGIC
 // ==========================================
 const forceChangePasswordForm = document.getElementById("force-change-password-form");
 if (forceChangePasswordForm) {
-    forceChangePasswordForm.addEventListener("submit", async (e) => {
+    forceChangePasswordForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
         e.preventDefault();
-        const oldPass = (document.getElementById("old_password")).value;
-        const newPass = (document.getElementById("new_password")).value;
+        const oldPass = document.getElementById("old_password").value;
+        const newPass = document.getElementById("new_password").value;
         const token = localStorage.getItem("access_token");
-        
         try {
-            const response = await fetch("http://localhost:8000/api/users/change-password/", {
+            const response = yield fetch("http://localhost:8000/api/users/change-password/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -96,35 +101,37 @@ if (forceChangePasswordForm) {
                 },
                 body: JSON.stringify({ old_password: oldPass, new_password: newPass })
             });
-            
             if (response.ok) {
-                alert("Senha alterada com sucesso!");
+                showToast("Senha alterada com sucesso!", 'success');
                 const role = localStorage.getItem("user_role");
-                window.location.href = role === "ADMIN" ? "admin-dashboard.html" : "medical-dashboard.html";
-            } else {
-                const data = await response.json();
-                alert("Erro ao alterar senha: " + JSON.stringify(data));
+                setTimeout(() => {
+                    window.location.href = role === "ADMIN" ? "admin-dashboard.html" : "medical-dashboard.html";
+                }, 1500);
             }
-        } catch (error) {
-            alert("Erro de conexão.");
+            else {
+                const data = yield response.json();
+                showToast("Erro ao alterar senha: " + ((_a = data === null || data === void 0 ? void 0 : data.detail) !== null && _a !== void 0 ? _a : "Verifique os dados."), 'error');
+            }
         }
-    });
+        catch (error) {
+            showToast("Erro de conexão.", 'error');
+        }
+    }));
 }
-
 // ==========================================
 // ADMIN DASHBOARD LOGIC
 // ==========================================
 const resetRequestsTbody = document.getElementById("reset-requests-tbody");
 if (resetRequestsTbody) {
     requireAdmin();
-    const fetchRequests = async () => {
+    const fetchRequests = () => __awaiter(void 0, void 0, void 0, function* () {
         const token = localStorage.getItem("access_token");
         try {
-            const response = await fetch("http://localhost:8000/api/admin/reset-requests/", {
+            const response = yield fetch("http://localhost:8000/api/admin/reset-requests/", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (response.ok) {
-                const requests = await response.json();
+                const requests = yield response.json();
                 resetRequestsTbody.innerHTML = "";
                 requests.forEach((req) => {
                     const tr = document.createElement("tr");
@@ -139,14 +146,15 @@ if (resetRequestsTbody) {
                     resetRequestsTbody.appendChild(tr);
                 });
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.error("Erro ao buscar requisições:", error);
         }
-    };
-
-    window.handleResetAction = async (id, action) => {
+    });
+    window.handleResetAction = (id, action) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
         const token = localStorage.getItem("access_token");
-        const response = await fetch(`http://localhost:8000/api/admin/reset-requests/${id}/action/`, {
+        const response = yield fetch(`http://localhost:8000/api/admin/reset-requests/${id}/action/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -154,22 +162,22 @@ if (resetRequestsTbody) {
             },
             body: JSON.stringify({ action })
         });
-        const data = await response.json();
+        const data = yield response.json();
         if (response.ok) {
             if (action === "APPROVE") {
-                alert(`Solicitação Aprovada!\n\nSenha Temporária Gerada: ${data.temporary_password}\n\nCopie essa senha e entregue manualmente ao usuário.`);
-            } else {
-                alert("Solicitação Recusada e removida com sucesso.");
+                showToast(`Aprovado! Senha temporária: ${data.temporary_password}`, 'success', 12000);
             }
-            fetchRequests(); // Atualiza a lista
-        } else {
-            alert("Erro: " + JSON.stringify(data));
+            else {
+                showToast("Solicitação recusada com sucesso.", 'info');
+            }
+            fetchRequests();
         }
-    };
-
+        else {
+            showToast("Erro: " + ((_a = data === null || data === void 0 ? void 0 : data.detail) !== null && _a !== void 0 ? _a : JSON.stringify(data)), 'error');
+        }
+    });
     fetchRequests();
 }
-
 const logoutBtn = document.getElementById("logout-btn");
 if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
@@ -177,201 +185,350 @@ if (logoutBtn) {
         window.location.href = "index.html";
     });
 }
-
-// ==========================================
-// DEVICES LOGIC (TASK 9)
-// ==========================================
-
-
-export async function fetchDevices(status) {
-    const token = localStorage.getItem("access_token");
-    const url = new URL("http://localhost:8000/api/devices/");
-    if (status) url.searchParams.set("status", status);
-    const response = await fetch(url.toString(), {
-        headers: { "Authorization": `Bearer ${token}` }
+let activeTab = 'devices';
+export function fetchItems(status) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = localStorage.getItem("access_token");
+        const url = new URL(`http://localhost:8000/api/${activeTab}/`);
+        if (status && activeTab === 'devices')
+            url.searchParams.set("status", status);
+        const response = yield fetch(url.toString(), {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar ${activeTab}`);
+        }
+        const data = yield response.json();
+        return data.results ? data.results : data;
     });
-
-    if (!response.ok) {
-        throw new Error("Erro ao buscar dispositivos");
-    }
-
-    const data = await response.json();
-    return data.results ? data.results : data;
 }
-
-// ==========================================
-// RENDER DEVICES (TASK 10)
-// ==========================================
 const deviceMap = new Map();
-
-export async function renderDevices(statusFilter) {
-    const medicalTbody = document.getElementById("devices-tbody");
-    const adminTbody = document.getElementById("admin-devices-tbody");
-
-    if (!medicalTbody && !adminTbody) return;
-
-    try {
-        const devices = await fetchDevices(statusFilter);
-        
-        if (medicalTbody) {
-            medicalTbody.innerHTML = "";
-            devices.forEach((device) => {
-                let badgeClass = "badge-available";
-                if (device.status === "Em uso" || device.status === "IN_USE") badgeClass = "badge-inuse";
-                if (device.status === "Manutenção" || device.status === "MAINTENANCE") badgeClass = "badge-maintenance";
-                
-                medicalTbody.innerHTML += `
+export function renderItems(statusFilter) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const medicalTbody = document.getElementById("devices-tbody");
+        const adminTbody = document.getElementById("admin-devices-tbody");
+        if (!medicalTbody && !adminTbody)
+            return;
+        try {
+            const items = yield fetchItems(statusFilter);
+            if (medicalTbody) {
+                medicalTbody.innerHTML = "";
+                items.forEach((item) => {
+                    let statusOrQtyHtml = "";
+                    if (activeTab === 'devices') {
+                        let badgeClass = "badge-available";
+                        if (item.status === "Em uso" || item.status === "IN_USE")
+                            badgeClass = "badge-inuse";
+                        if (item.status === "Manutenção" || item.status === "MAINTENANCE")
+                            badgeClass = "badge-maintenance";
+                        statusOrQtyHtml = `<span class="badge ${badgeClass}">${item.status}</span>`;
+                    }
+                    else {
+                        statusOrQtyHtml = `${item.quantity}`;
+                    }
+                    medicalTbody.innerHTML += `
                     <tr>
-                        <td>${device.name}</td>
-                        <td>${device.device_type}</td>
-                        <td><span class="badge ${badgeClass}">${device.status}</span></td>
-                        <td>${device.location}</td>
+                        <td>${item.name}</td>
+                        <td>${item.device_type || item.utensil_type}</td>
+                        <td>${statusOrQtyHtml}</td>
+                        <td>${item.location}</td>
                     </tr>
                 `;
-            });
-        }
-        
-        if (adminTbody) {
-            adminTbody.innerHTML = "";
-            deviceMap.clear();
-            devices.forEach((device) => {
-                let badgeClass = "badge-available";
-                if (device.status === "Em uso" || device.status === "IN_USE") badgeClass = "badge-inuse";
-                if (device.status === "Manutenção" || device.status === "MAINTENANCE") badgeClass = "badge-maintenance";
-                deviceMap.set(device.id, device);
-                adminTbody.innerHTML += `
+                });
+            }
+            if (adminTbody) {
+                adminTbody.innerHTML = "";
+                deviceMap.clear();
+                items.forEach((item) => {
+                    let statusOrQtyHtml = "";
+                    if (activeTab === 'devices') {
+                        let badgeClass = "badge-available";
+                        if (item.status === "Em uso" || item.status === "IN_USE")
+                            badgeClass = "badge-inuse";
+                        if (item.status === "Manutenção" || item.status === "MAINTENANCE")
+                            badgeClass = "badge-maintenance";
+                        statusOrQtyHtml = `<span class="badge ${badgeClass}">${item.status}</span>`;
+                    }
+                    else {
+                        statusOrQtyHtml = `${item.quantity}`;
+                    }
+                    deviceMap.set(item.id, item);
+                    adminTbody.innerHTML += `
                     <tr>
-                        <td>${device.name}</td>
-                        <td>${device.device_type}</td>
-                        <td><span class="badge ${badgeClass}">${device.status}</span></td>
-                        <td>${device.location}</td>
+                        <td>${item.name}</td>
+                        <td>${item.device_type || item.utensil_type}</td>
+                        <td>${statusOrQtyHtml}</td>
+                        <td>${item.location}</td>
                         <td>
-                            <button class="btn btn-sm btn-success" style="margin-right: 0.5rem;" onclick="openEditModal(${device.id})">Editar</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteDevice(${device.id})">Excluir</button>
+                            <button class="btn btn-sm btn-success" style="margin-right: 0.5rem;" onclick="openEditModal(${item.id})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDevice(${item.id})">Excluir</button>
                         </td>
                     </tr>
                 `;
-            });
+                });
+            }
         }
-    } catch (error) {
-        if (medicalTbody) medicalTbody.innerHTML = '<tr><td colspan="4">Erro ao carregar dispositivos.</td></tr>';
-        if (adminTbody) adminTbody.innerHTML = '<tr><td colspan="5">Erro ao carregar dispositivos.</td></tr>';
-    }
+        catch (error) {
+            if (medicalTbody)
+                medicalTbody.innerHTML = `<tr><td colspan="4">Erro ao carregar ${activeTab}.</td></tr>`;
+            if (adminTbody)
+                adminTbody.innerHTML = `<tr><td colspan="5">Erro ao carregar ${activeTab}.</td></tr>`;
+        }
+    });
 }
-
+// Tabs Logic
+const tabDevices = document.getElementById("tab-devices");
+const tabUtensils = document.getElementById("tab-utensils");
+if (tabDevices && tabUtensils) {
+    tabDevices.addEventListener("click", () => {
+        var _a, _b;
+        activeTab = 'devices';
+        tabDevices.classList.add("active");
+        tabDevices.style.borderBottom = "2px solid var(--primary-blue)";
+        tabDevices.style.fontWeight = "bold";
+        tabDevices.style.color = "initial";
+        tabUtensils.classList.remove("active");
+        tabUtensils.style.borderBottom = "none";
+        tabUtensils.style.fontWeight = "normal";
+        tabUtensils.style.color = "#666";
+        const thStatusQty = document.getElementById("th-status-qty");
+        if (thStatusQty)
+            thStatusQty.innerText = "Status";
+        const filterContainer = (_a = document.getElementById("status-filter")) === null || _a === void 0 ? void 0 : _a.parentElement;
+        if (filterContainer)
+            filterContainer.style.display = "block";
+        const filter = (_b = document.getElementById("status-filter")) === null || _b === void 0 ? void 0 : _b.value;
+        renderItems(filter || undefined);
+    });
+    tabUtensils.addEventListener("click", () => {
+        var _a, _b;
+        activeTab = 'utensils';
+        tabUtensils.classList.add("active");
+        tabUtensils.style.borderBottom = "2px solid var(--primary-blue)";
+        tabUtensils.style.fontWeight = "bold";
+        tabUtensils.style.color = "initial";
+        tabDevices.classList.remove("active");
+        tabDevices.style.borderBottom = "none";
+        tabDevices.style.fontWeight = "normal";
+        tabDevices.style.color = "#666";
+        const thStatusQty = document.getElementById("th-status-qty");
+        if (thStatusQty)
+            thStatusQty.innerText = "Quantidade";
+        const filterContainer = (_a = document.getElementById("status-filter")) === null || _a === void 0 ? void 0 : _a.parentElement;
+        if (filterContainer)
+            filterContainer.style.display = "none";
+        const filter = (_b = document.getElementById("status-filter")) === null || _b === void 0 ? void 0 : _b.value;
+        renderItems(filter || undefined);
+    });
+}
 // ==========================================
 // EDIT MODAL LOGIC
 // ==========================================
-const editModal     = document.getElementById("edit-modal");
-const editForm      = document.getElementById("edit-device-form");
+const editModal = document.getElementById("edit-modal");
+const editForm = document.getElementById("edit-device-form");
 const editCancelBtn = document.getElementById("edit-cancel-btn");
-
 if (editModal && editForm && editCancelBtn) {
     editCancelBtn.addEventListener("click", () => {
         editModal.style.display = "none";
     });
-
     editModal.addEventListener("click", (e) => {
-        if (e.target === editModal) editModal.style.display = "none";
+        if (e.target === editModal)
+            editModal.style.display = "none";
     });
-
-    editForm.addEventListener("submit", async (e) => {
+    editForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
         e.preventDefault();
-        const id       = (document.getElementById("edit-device-id")).value;
-        const name     = (document.getElementById("edit-name")).value.trim();
-        const device_type = (document.getElementById("edit-type")).value.trim();
-        const status   = (document.getElementById("edit-status")).value;
-        const location = (document.getElementById("edit-location")).value.trim();
-
+        const id = document.getElementById("edit-device-id").value;
+        const name = document.getElementById("edit-name").value.trim();
+        const type_val = document.getElementById("edit-type").value.trim();
+        const location = document.getElementById("edit-location").value.trim();
+        const payload = { name, location };
+        if (activeTab === 'devices') {
+            payload.device_type = type_val;
+            payload.status = document.getElementById("edit-status").value;
+        }
+        else {
+            payload.utensil_type = type_val;
+            payload.quantity = parseInt(document.getElementById("edit-quantity").value, 10);
+        }
         const token = localStorage.getItem("access_token");
         try {
-            const response = await fetch(`http://localhost:8000/api/devices/${id}/`, {
+            const response = yield fetch(`http://localhost:8000/api/${activeTab}/${id}/`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ name, device_type, status, location })
+                body: JSON.stringify(payload)
             });
-
             if (response.status === 401) {
-                alert("Sessão expirada. Faça login novamente.");
-                localStorage.clear();
-                window.location.href = "index.html";
+                showToast("Sessão expirada. Faça login novamente.", 'error');
+                setTimeout(() => { localStorage.clear(); window.location.href = "index.html"; }, 1500);
                 return;
             }
-
             if (!response.ok) {
-                const data = await response.json();
-                alert("Erro ao salvar: " + (data?.detail ?? JSON.stringify(data)));
+                const data = yield response.json();
+                showToast("Erro ao salvar: " + ((_a = data === null || data === void 0 ? void 0 : data.detail) !== null && _a !== void 0 ? _a : "Verifique os campos."), 'error');
                 return;
             }
-
             editModal.style.display = "none";
-            alert("Dispositivo atualizado com sucesso!");
-            renderDevices();
-        } catch {
-            alert("Falha de conexão com o servidor.");
+            showToast("Item atualizado com sucesso!", 'success');
+            renderItems();
         }
-    });
+        catch (_b) {
+            showToast("Falha de conexão com o servidor.", 'error');
+        }
+    }));
 }
-
 window.openEditModal = (id) => {
-    const device = deviceMap.get(id);
-    if (!device || !editModal) return;
-    (document.getElementById("edit-device-id")).value = String(device.id);
-    (document.getElementById("edit-name")).value = device.name;
-    (document.getElementById("edit-type")).value = device.device_type;
-    (document.getElementById("edit-status")).value = device.status;
-    (document.getElementById("edit-location")).value = device.location;
+    const item = deviceMap.get(id);
+    if (!item || !editModal)
+        return;
+    document.getElementById("edit-device-id").value = String(item.id);
+    document.getElementById("edit-name").value = item.name;
+    document.getElementById("edit-type").value = item.device_type || item.utensil_type || '';
+    document.getElementById("edit-location").value = item.location;
+    const statusGroup = document.getElementById("edit-status-group");
+    const qtyGroup = document.getElementById("edit-quantity-group");
+    if (activeTab === 'devices') {
+        if (statusGroup)
+            statusGroup.style.display = "block";
+        if (qtyGroup)
+            qtyGroup.style.display = "none";
+        document.getElementById("edit-status").value = item.status || "Disponível";
+    }
+    else {
+        if (statusGroup)
+            statusGroup.style.display = "none";
+        if (qtyGroup)
+            qtyGroup.style.display = "block";
+        document.getElementById("edit-quantity").value = String(item.quantity || 0);
+    }
+    const title = document.getElementById("edit-modal-title");
+    if (title)
+        title.innerText = activeTab === 'devices' ? "Editar Dispositivo" : "Editar Utensílio";
     editModal.style.display = "flex";
 };
-
 // ==========================================
 // DELETE DEVICE LOGIC
 // ==========================================
-window.deleteDevice = async (id) => {
-    if (!confirm("Tem certeza que deseja excluir este dispositivo? Esta ação não pode ser desfeita.")) return;
-
+window.deleteDevice = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!confirm("Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."))
+        return;
     const token = localStorage.getItem("access_token");
     try {
-        const response = await fetch(`http://localhost:8000/api/devices/${id}/`, {
+        const response = yield fetch(`http://localhost:8000/api/${activeTab}/${id}/`, {
             method: "DELETE",
             headers: { "Authorization": `Bearer ${token}` }
         });
-
         if (response.status === 401) {
-            alert("Sessão expirada. Faça login novamente.");
-            localStorage.clear();
-            window.location.href = "index.html";
+            showToast("Sessão expirada. Faça login novamente.", 'error');
+            setTimeout(() => { localStorage.clear(); window.location.href = "index.html"; }, 1500);
             return;
         }
-
         if (response.status === 403) {
-            alert("Você não tem permissão para excluir este dispositivo.");
+            showToast("Você não tem permissão para excluir este item.", 'error');
             return;
         }
-
         if (!response.ok) {
-            alert("Erro ao excluir dispositivo.");
+            showToast("Erro ao excluir item.", 'error');
             return;
         }
-
-        alert("Dispositivo excluído com sucesso!");
-        renderDevices();
-    } catch {
-        alert("Falha de conexão com o servidor.");
+        showToast("Item excluído com sucesso!", 'success');
+        renderItems();
     }
-};
-
-if (document.getElementById("devices-tbody")) requireClinical();
-if (document.getElementById("admin-devices-tbody")) requireAdmin();
-
+    catch (_a) {
+        showToast("Falha de conexão com o servidor.", 'error');
+    }
+});
+if (document.getElementById("devices-tbody"))
+    requireClinical();
+if (document.getElementById("admin-devices-tbody"))
+    requireAdmin();
 const statusFilter = document.getElementById("status-filter");
 if (statusFilter) {
     statusFilter.addEventListener("change", () => {
-        renderDevices(statusFilter.value || undefined);
+        renderItems(statusFilter.value || undefined);
     });
 }
-
-renderDevices();
+// ==========================================
+// ADD DEVICE LOGIC
+// ==========================================
+const addModal = document.getElementById("add-modal");
+const addBtn = document.getElementById("add-device-btn");
+const addForm = document.getElementById("add-device-form");
+const addCancelBtn = document.getElementById("add-cancel-btn");
+if (addModal && addBtn && addForm && addCancelBtn) {
+    addBtn.addEventListener("click", () => {
+        addForm.reset();
+        const statusGroup = document.getElementById("add-status-group");
+        const qtyGroup = document.getElementById("add-quantity-group");
+        if (activeTab === 'devices') {
+            if (statusGroup)
+                statusGroup.style.display = "block";
+            if (qtyGroup)
+                qtyGroup.style.display = "none";
+        }
+        else {
+            if (statusGroup)
+                statusGroup.style.display = "none";
+            if (qtyGroup)
+                qtyGroup.style.display = "block";
+        }
+        const title = document.getElementById("add-modal-title");
+        if (title)
+            title.innerText = activeTab === 'devices' ? "Adicionar Dispositivo" : "Adicionar Utensílio";
+        addModal.style.display = "flex";
+    });
+    addCancelBtn.addEventListener("click", () => {
+        addModal.style.display = "none";
+    });
+    addModal.addEventListener("click", (e) => {
+        if (e.target === addModal)
+            addModal.style.display = "none";
+    });
+    addForm.addEventListener("submit", (e) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        e.preventDefault();
+        const name = document.getElementById("add-name").value.trim();
+        const type_val = document.getElementById("add-type").value.trim();
+        const location = document.getElementById("add-location").value.trim();
+        const payload = { name, location };
+        if (activeTab === 'devices') {
+            payload.device_type = type_val;
+            payload.status = document.getElementById("add-status").value;
+        }
+        else {
+            payload.utensil_type = type_val;
+            payload.quantity = parseInt(document.getElementById("add-quantity").value, 10);
+        }
+        const token = localStorage.getItem("access_token");
+        try {
+            const response = yield fetch(`http://localhost:8000/api/${activeTab}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+            if (response.status === 401) {
+                showToast("Sessão expirada. Faça login novamente.", 'error');
+                setTimeout(() => { localStorage.clear(); window.location.href = "index.html"; }, 1500);
+                return;
+            }
+            if (!response.ok) {
+                const data = yield response.json();
+                showToast("Erro ao adicionar: " + ((_a = data === null || data === void 0 ? void 0 : data.detail) !== null && _a !== void 0 ? _a : "Verifique os campos."), 'error');
+                return;
+            }
+            addModal.style.display = "none";
+            showToast("Item adicionado com sucesso!", 'success');
+            renderItems();
+        }
+        catch (_b) {
+            showToast("Falha de conexão com o servidor.", 'error');
+        }
+    }));
+}
+renderItems();

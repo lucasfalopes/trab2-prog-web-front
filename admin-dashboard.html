@@ -64,14 +64,18 @@
             </tbody>
         </table>
         
-        <h3 style="margin-top: 3rem;">Gestão de Dispositivos</h3>
-        <button id="add-device-btn" class="btn btn-primary" style="margin-bottom: 1rem;">Adicionar Dispositivo</button>
+        <h3 style="margin-top: 3rem;">Gestão de Inventário</h3>
+        <div class="tabs" style="margin-bottom: 1rem; border-bottom: 1px solid #ddd; display: flex; gap: 1rem;">
+            <button id="tab-devices" class="tab-btn active" style="padding: 0.5rem 1rem; background: none; border: none; border-bottom: 2px solid var(--primary-blue); font-weight: bold; cursor: pointer;">Dispositivos</button>
+            <button id="tab-utensils" class="tab-btn" style="padding: 0.5rem 1rem; background: none; border: none; color: #666; cursor: pointer;">Utensílios</button>
+        </div>
+        <button id="add-device-btn" class="btn btn-primary" style="margin-bottom: 1rem;">Adicionar Item</button>
         <table class="shadow" style="border-radius: var(--border-radius); overflow: hidden;">
             <thead>
                 <tr>
                     <th>Nome</th>
                     <th>Tipo</th>
-                    <th>Status</th>
+                    <th id="th-status-qty">Status</th>
                     <th>Localização</th>
                     <th>Ações</th>
                 </tr>
@@ -84,7 +88,7 @@
     </main>
     <div id="edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
         <div class="login-card shadow" style="width:100%; max-width:480px; margin:1rem;">
-            <h3 style="margin-bottom:1.5rem;">Editar Dispositivo</h3>
+            <h3 style="margin-bottom:1.5rem;" id="edit-modal-title">Editar Item</h3>
             <form id="edit-device-form">
                 <input type="hidden" id="edit-device-id">
                 <div class="form-group">
@@ -95,13 +99,17 @@
                     <label for="edit-type">Tipo</label>
                     <input type="text" id="edit-type" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="edit-status-group">
                     <label for="edit-status">Status</label>
-                    <select id="edit-status">
+                    <select id="edit-status" class="form-control" required>
                         <option value="Disponível">Disponível</option>
                         <option value="Em uso">Em uso</option>
                         <option value="Manutenção">Manutenção</option>
                     </select>
+                </div>
+                <div class="form-group" id="edit-quantity-group" style="display:none;">
+                    <label for="edit-quantity">Quantidade</label>
+                    <input type="number" id="edit-quantity" class="form-control" min="0">
                 </div>
                 <div class="form-group">
                     <label for="edit-location">Localização</label>
@@ -110,6 +118,41 @@
                 <div style="display:flex; gap:0.5rem; margin-top:1rem;">
                     <button type="submit" class="btn btn-primary" style="flex:1;">Salvar</button>
                     <button type="button" id="edit-cancel-btn" class="btn" style="flex:1; background:#6c757d; color:white;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="add-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+        <div class="login-card shadow" style="width:100%; max-width:480px; margin:1rem;">
+            <h3 style="margin-bottom:1.5rem;" id="add-modal-title">Adicionar Item</h3>
+            <form id="add-device-form">
+                <div class="form-group">
+                    <label for="add-name">Nome</label>
+                    <input type="text" id="add-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-type">Tipo</label>
+                    <input type="text" id="add-type" required>
+                </div>
+                <div class="form-group" id="add-status-group">
+                    <label for="add-status">Status</label>
+                    <select id="add-status" class="form-control" required>
+                        <option value="Disponível">Disponível</option>
+                        <option value="Em uso">Em uso</option>
+                        <option value="Manutenção">Manutenção</option>
+                    </select>
+                </div>
+                <div class="form-group" id="add-quantity-group" style="display:none;">
+                    <label for="add-quantity">Quantidade</label>
+                    <input type="number" id="add-quantity" class="form-control" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="add-location">Localização</label>
+                    <input type="text" id="add-location" required>
+                </div>
+                <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">Adicionar</button>
+                    <button type="button" id="add-cancel-btn" class="btn" style="flex:1; background:#6c757d; color:white;">Cancelar</button>
                 </div>
             </form>
         </div>
