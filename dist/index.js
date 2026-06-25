@@ -136,6 +136,11 @@ export function fetchItems(status) {
         const response = yield fetch(url.toString(), {
             headers: { "Authorization": `Bearer ${token}` }
         });
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "index.html";
+            return [];
+        }
         if (!response.ok) {
             throw new Error(`Erro ao buscar ${activeTab}`);
         }
