@@ -27,14 +27,22 @@ if (resetRequestsTbody) {
                 const requests = await response.json();
                 resetRequestsTbody.innerHTML = "";
                 requests.forEach((req: any) => {
+                    let actionsHtml: string;
+                    if (req.status === 'PENDING') {
+                        actionsHtml = `
+                            <button class="btn btn-sm btn-success" onclick="handleResetAction(${req.id}, 'APPROVE')">Aprovar</button>
+                            <button class="btn btn-sm btn-danger" onclick="handleResetAction(${req.id}, 'REJECT')">Recusar</button>
+                        `;
+                    } else if (req.status === 'APPROVED') {
+                        actionsHtml = `<span style="color: var(--success); font-weight: 600;">Aceito</span>`;
+                    } else {
+                        actionsHtml = `<span style="color: var(--danger); font-weight: 600;">Recusado</span>`;
+                    }
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
                         <td>${new Date(req.created_at).toLocaleString()}</td>
                         <td>${req.email}</td>
-                        <td>
-                            <button class="btn btn-sm btn-success" onclick="handleResetAction(${req.id}, 'APPROVE')">Aprovar</button>
-                            <button class="btn btn-sm btn-danger" onclick="handleResetAction(${req.id}, 'REJECT')">Recusar</button>
-                        </td>
+                        <td>${actionsHtml}</td>
                     `;
                     resetRequestsTbody.appendChild(tr);
                 });
