@@ -3,96 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Administrador - Sistema Hospitalar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Painel do Engenheiro Clínico - Inventário</title>
     <link rel="stylesheet" href="./src/styles/global.css">
-    <style>
-        .dashboard-header {
-            background-color: var(--primary-blue);
-            color: var(--white);
-            padding: 1rem 0;
-        }
-        .dashboard-header .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .dashboard-content {
-            padding: 2rem 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--white);
-            margin-top: 1rem;
-        }
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-        }
-        .btn-success { background-color: var(--success); color: white; }
-        .btn-danger { background-color: var(--danger); color: white; }
-    </style>
 </head>
 <body>
-    <div class="header" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        <div>
-            <h2 style="margin: 0; color: #333;">Painel do Engenheiro</h2>
-            <nav style="margin-top: 10px;">
-                <a href="admin-dashboard.html" style="margin-right: 15px; font-weight: bold; color: var(--primary-blue); text-decoration: none;">Gestão de Inventário</a>
-                <a href="users-dashboard.html" style="color: #666; text-decoration: none;">Gestão de Usuários</a>
+    <header class="glass-header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; font-size: 1.25rem;">Painel de Engenharia</h2>
+            <nav style="display: flex; gap: 15px; align-items: center;">
+                <a href="admin-dashboard.html" style="font-weight: 700; color: var(--white); border-bottom: 2px solid var(--primary);">Inventário</a>
+                <a href="users-dashboard.html" style="color: var(--text-muted);">Usuários & Senhas</a>
+                <span style="border-left: 1px solid var(--glass-border); height: 20px; margin: 0 5px;"></span>
+                <a href="change-password.html" class="btn btn-sm" style="color: var(--text-main);">Alterar Senha</a>
+                <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
             </nav>
         </div>
-        <button id="logout-btn" class="btn btn-danger">Sair</button>
+    </header>
+
+    <main class="container fade-in" style="padding-top: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem;">Gestão de Inventário</h3>
+                <p style="color: var(--text-muted);">Controle total sobre os dispositivos e utensílios.</p>
+            </div>
+            <button id="add-device-btn" class="btn btn-primary">+ Adicionar Novo Ativo</button>
+        </div>
+        
+        <div class="tabs">
+            <button id="tab-devices" class="tab-btn active">Dispositivos Médicos</button>
+            <button id="tab-utensils" class="tab-btn">Utensílios Gerais</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome do Ativo</th>
+                        <th>Tipo / Categoria</th>
+                        <th id="th-status-qty">Status / Qtd</th>
+                        <th>Localização</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-devices-tbody">
+                    <tr><td colspan="5" class="text-center">Sincronizando com o servidor...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="add-modal" class="modal">
+        <div class="glass-panel modal-content" style="padding: 2rem;">
+            <h3 id="add-modal-title" style="margin-bottom: 1.5rem;">Adicionar Item</h3>
+            <form id="add-device-form">
+                <div class="form-group">
+                    <label for="add-name">Nome do Ativo</label>
+                    <input type="text" id="add-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-type">Tipo / Categoria</label>
+                    <input type="text" id="add-type" required>
+                </div>
+                <div class="form-group" id="add-status-group">
+                    <label for="add-status">Status Operacional</label>
+                    <select id="add-status" class="form-control" required>
+                        <option value="Disponível">Disponível</option>
+                        <option value="Em uso">Em uso</option>
+                        <option value="Manutenção">Manutenção</option>
+                    </select>
+                </div>
+                <div class="form-group" id="add-quantity-group" style="display:none;">
+                    <label for="add-quantity">Quantidade Inicial</label>
+                    <input type="number" id="add-quantity" class="form-control" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="add-location">Localização / Ala</label>
+                    <input type="text" id="add-location" required>
+                </div>
+                <div style="display:flex; gap:1rem; margin-top:2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">Salvar Registro</button>
+                    <button type="button" id="add-cancel-btn" class="btn" style="flex:1; background: rgba(255,255,255,0.1); color: white;">Cancelar</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <main class="container dashboard-content">
-        
-        <h3 style="margin-top: 3rem;">Gestão de Inventário</h3>
-        <div class="tabs" style="margin-bottom: 1rem; border-bottom: 1px solid #ddd; display: flex; gap: 1rem;">
-            <button id="tab-devices" class="tab-btn active" style="padding: 0.5rem 1rem; background: none; border: none; border-bottom: 2px solid var(--primary-blue); font-weight: bold; cursor: pointer;">Dispositivos</button>
-            <button id="tab-utensils" class="tab-btn" style="padding: 0.5rem 1rem; background: none; border: none; color: #666; cursor: pointer;">Utensílios</button>
-        </div>
-        <button id="add-device-btn" class="btn btn-primary" style="margin-bottom: 1rem;">Adicionar Item</button>
-        <table class="shadow" style="border-radius: var(--border-radius); overflow: hidden;">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Tipo</th>
-                    <th id="th-status-qty">Status</th>
-                    <th>Localização</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="admin-devices-tbody">
-                <!-- Preenchido via TS na próxima tarefa -->
-                <tr><td colspan="5" style="text-align: center;">Carregando dispositivos...</td></tr>
-            </tbody>
-        </table>
-    </main>
-    <div id="edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
-        <div class="login-card shadow" style="width:100%; max-width:480px; margin:1rem;">
-            <h3 style="margin-bottom:1.5rem;" id="edit-modal-title">Editar Item</h3>
+    <div id="edit-modal" class="modal">
+        <div class="glass-panel modal-content" style="padding: 2rem;">
+            <h3 id="edit-modal-title" style="margin-bottom: 1.5rem;">Editar Registro</h3>
             <form id="edit-device-form">
                 <input type="hidden" id="edit-device-id">
                 <div class="form-group">
-                    <label for="edit-name">Nome</label>
+                    <label for="edit-name">Nome do Ativo</label>
                     <input type="text" id="edit-name" required>
                 </div>
                 <div class="form-group">
-                    <label for="edit-type">Tipo</label>
+                    <label for="edit-type">Tipo / Categoria</label>
                     <input type="text" id="edit-type" required>
                 </div>
                 <div class="form-group" id="edit-status-group">
-                    <label for="edit-status">Status</label>
+                    <label for="edit-status">Status Operacional</label>
                     <select id="edit-status" class="form-control" required>
                         <option value="Disponível">Disponível</option>
                         <option value="Em uso">Em uso</option>
@@ -104,51 +115,18 @@
                     <input type="number" id="edit-quantity" class="form-control" min="0">
                 </div>
                 <div class="form-group">
-                    <label for="edit-location">Localização</label>
+                    <label for="edit-location">Localização / Ala</label>
                     <input type="text" id="edit-location" required>
                 </div>
-                <div style="display:flex; gap:0.5rem; margin-top:1rem;">
-                    <button type="submit" class="btn btn-primary" style="flex:1;">Salvar</button>
-                    <button type="button" id="edit-cancel-btn" class="btn" style="flex:1; background:#6c757d; color:white;">Cancelar</button>
+                <div style="display:flex; gap:1rem; margin-top:2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">Confirmar Alterações</button>
+                    <button type="button" id="edit-cancel-btn" class="btn" style="flex:1; background: rgba(255,255,255,0.1); color: white;">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
-    <div id="add-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
-        <div class="login-card shadow" style="width:100%; max-width:480px; margin:1rem;">
-            <h3 style="margin-bottom:1.5rem;" id="add-modal-title">Adicionar Item</h3>
-            <form id="add-device-form">
-                <div class="form-group">
-                    <label for="add-name">Nome</label>
-                    <input type="text" id="add-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="add-type">Tipo</label>
-                    <input type="text" id="add-type" required>
-                </div>
-                <div class="form-group" id="add-status-group">
-                    <label for="add-status">Status</label>
-                    <select id="add-status" class="form-control" required>
-                        <option value="Disponível">Disponível</option>
-                        <option value="Em uso">Em uso</option>
-                        <option value="Manutenção">Manutenção</option>
-                    </select>
-                </div>
-                <div class="form-group" id="add-quantity-group" style="display:none;">
-                    <label for="add-quantity">Quantidade</label>
-                    <input type="number" id="add-quantity" class="form-control" min="0" value="0">
-                </div>
-                <div class="form-group">
-                    <label for="add-location">Localização</label>
-                    <input type="text" id="add-location" required>
-                </div>
-                <div style="display:flex; gap:0.5rem; margin-top:1rem;">
-                    <button type="submit" class="btn btn-primary" style="flex:1;">Adicionar</button>
-                    <button type="button" id="add-cancel-btn" class="btn" style="flex:1; background:#6c757d; color:white;">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+
+    <div id="toast-container"></div>
     <script type="module" src="./dist/index.js"></script>
 </body>
 </html>

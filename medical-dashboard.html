@@ -4,59 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Médico - Sistema Hospitalar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./src/styles/global.css">
-    <style>
-        .dashboard-header { background-color: var(--primary-blue); color: var(--white); padding: 1rem 0; }
-        .dashboard-header .container { display: flex; justify-content: space-between; align-items: center; }
-        .dashboard-content { padding: 2rem 0; }
-        table { width: 100%; border-collapse: collapse; background: var(--white); margin-top: 1rem; }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; }
-        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; font-weight: 500; }
-        .badge-available { background-color: var(--success); color: white; }
-        .badge-inuse { background-color: var(--warning); color: black; }
-        .badge-maintenance { background-color: var(--danger); color: white; }
-    </style>
 </head>
 <body>
-    <header class="dashboard-header">
-        <div class="container">
-            <h2>Painel da Equipe Clínica</h2>
-            <button id="logout-btn" class="btn btn-sm" style="background: transparent; border: 1px solid white; color: white;">Sair</button>
+    <header class="glass-header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; font-size: 1.25rem;">Portal Clínico</h2>
+            <div>
+                <a href="change-password.html" class="btn btn-sm" style="color: var(--text-main); margin-right: 15px;">Alterar Senha</a>
+                <button id="logout-btn" class="btn btn-sm btn-danger">Sair da Conta</button>
+            </div>
         </div>
     </header>
-    <main class="container dashboard-content">
-        <h3>Inventário Hospitalar</h3>
-        <p>Acompanhamento em tempo real dos itens.</p>
-        <div class="tabs" style="margin-bottom: 1rem; border-bottom: 1px solid #ddd; display: flex; gap: 1rem;">
-            <button id="tab-devices" class="tab-btn active" style="padding: 0.5rem 1rem; background: none; border: none; border-bottom: 2px solid var(--primary-blue); font-weight: bold; cursor: pointer;">Dispositivos</button>
-            <button id="tab-utensils" class="tab-btn" style="padding: 0.5rem 1rem; background: none; border: none; color: #666; cursor: pointer;">Utensílios</button>
+
+    <main class="container fade-in" style="padding-top: 2rem;">
+        <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem;">Inventário Hospitalar</h3>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Acompanhamento em tempo real dos ativos da sua ala.</p>
+        
+        <div class="tabs">
+            <button id="tab-devices" class="tab-btn active">Dispositivos Médicos</button>
+            <button id="tab-utensils" class="tab-btn">Utensílios Gerais</button>
         </div>
-        <div style="margin-bottom: 1rem;">
-            <label for="status-filter">Filtrar por status:</label>
-            <select id="status-filter" style="display:inline-block; width:auto; margin-left:0.5rem; padding:0.375rem 0.75rem; border:1px solid #ced4da; border-radius:4px;">
+
+        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+            <label for="status-filter" style="font-weight: 500; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Filtrar por status:</label>
+            <select id="status-filter" class="form-control" style="width: 200px;">
                 <option value="">Todos</option>
                 <option value="Disponível">Disponível</option>
                 <option value="Em uso">Em uso</option>
                 <option value="Manutenção">Manutenção</option>
             </select>
         </div>
-        <table class="shadow" style="border-radius: var(--border-radius); overflow: hidden;">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Tipo</th>
-                    <th id="th-status-qty">Status</th>
-                    <th>Localização</th>
-                </tr>
-            </thead>
-            <tbody id="devices-tbody">
-                <!-- Preenchido via TS na próxima tarefa -->
-                <tr><td colspan="4">Carregando dispositivos...</td></tr>
-            </tbody>
-        </table>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome do Ativo</th>
+                        <th>Tipo / Categoria</th>
+                        <th id="th-status-qty">Status Operacional</th>
+                        <th>Localização</th>
+                    </tr>
+                </thead>
+                <tbody id="devices-tbody">
+                    <!-- Linhas preenchidas via JavaScript -->
+                    <tr><td colspan="4" class="text-center">Carregando dados do servidor...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </main>
+    
+    <div id="toast-container"></div>
     <script type="module" src="./dist/index.js"></script>
 </body>
 </html>
