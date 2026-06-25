@@ -1,3 +1,4 @@
+// Fonte única das chaves usadas no localStorage — evita strings espalhadas pelo código
 const TOKEN_KEY = 'access_token';
 const REFRESH_KEY = 'refresh_token';
 const ROLE_KEY = 'user_role';
@@ -17,6 +18,7 @@ export function getUsername(): string | null {
   return localStorage.getItem(USERNAME_KEY);
 }
 
+// A autenticação é verificada apenas pela presença do token — a validade é checada pelo backend a cada requisição
 export function isAuthenticated(): boolean {
   return !!getToken();
 }
@@ -40,6 +42,7 @@ export function logout(): void {
   window.location.href = 'index.html';
 }
 
+// Monta os headers de toda requisição autenticada — Content-Type + Bearer token
 export function authHeaders(): Record<string, string> {
   const token = getToken();
   return {

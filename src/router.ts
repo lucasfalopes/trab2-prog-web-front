@@ -1,11 +1,13 @@
 import { isAuthenticated, getRole } from './auth.js';
 
+// Redireciona para login se não há token salvo
 export function requireAuth(): void {
   if (!isAuthenticated()) {
     window.location.href = 'index.html';
   }
 }
 
+// Guard de página ADMIN: redireciona médico (CLINICAL) para o painel dele
 export function requireAdmin(): void {
   requireAuth();
   if (getRole() !== 'ADMIN') {
@@ -13,6 +15,7 @@ export function requireAdmin(): void {
   }
 }
 
+// Guard de página CLINICAL: redireciona engenheiro (ADMIN) para o painel dele
 export function requireClinical(): void {
   requireAuth();
   if (getRole() !== 'CLINICAL') {

@@ -14,6 +14,7 @@ if (loginForm) {
         const password = passwordInput.value;
 
         try {
+            // /api/token/ retorna access, refresh, role (ADMIN|CLINICAL) e must_change_password
             const response = await fetch("http://localhost:8000/api/token/", {
                 method: "POST",
                 headers: {
@@ -24,14 +25,14 @@ if (loginForm) {
 
             if (response.ok) {
                 const data = await response.json();
-                
-                // Salvar dados no localStorage
+
+                // Persiste credenciais no localStorage — usadas em todas as requisições autenticadas
                 localStorage.setItem("access_token", data.access);
                 localStorage.setItem("refresh_token", data.refresh);
                 localStorage.setItem("user_role", data.role);
                 localStorage.setItem("username", data.username);
-                
-                // Redirecionar usuário dependendo da flag must_change_password
+
+                // must_change_password é ativado pelo admin ao aprovar um reset de senha
                 if (data.must_change_password) {
                     window.location.href = "force-change-password.html";
                 } else if (data.role === "ADMIN") {
@@ -114,64 +115,7 @@ if (forceChangePasswordForm) {
     });
 }
 
-// ==========================================
-// ADMIN DASHBOARD LOGIC
-// ==========================================
-const resetRequestsTbody = document.getElementById("reset-requests-tbody");
-if (resetRequestsTbody) {
-    requireAdmin();
-    const fetchRequests = async () => {
-        const token = localStorage.getItem("access_token");
-        try {
-            const response = await fetch("http://localhost:8000/api/admin/reset-requests/", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (response.ok) {
-                const requests = await response.json();
-                resetRequestsTbody.innerHTML = "";
-                requests.forEach((req: any) => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${new Date(req.created_at).toLocaleString()}</td>
-                        <td>${req.email}</td>
-                        <td>
-                            <button class="btn btn-sm btn-success" onclick="handleResetAction(${req.id}, 'APPROVE')">Aprovar</button>
-                            <button class="btn btn-sm btn-danger" onclick="handleResetAction(${req.id}, 'REJECT')">Recusar</button>
-                        </td>
-                    `;
-                    resetRequestsTbody.appendChild(tr);
-                });
-            }
-        } catch (error) {
-            console.error("Erro ao buscar requisições:", error);
-        }
-    };
 
-    (window as any).handleResetAction = async (id: number, action: string) => {
-        const token = localStorage.getItem("access_token");
-        const response = await fetch(`http://localhost:8000/api/admin/reset-requests/${id}/action/`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ action })
-        });
-        const data = await response.json();
-        if (response.ok) {
-            if (action === "APPROVE") {
-                showToast(`Aprovado! Senha temporária: ${data.temporary_password}`, 'success', 12000);
-            } else {
-                showToast("Solicitação recusada com sucesso.", 'info');
-            }
-            fetchRequests();
-        } else {
-            showToast("Erro: " + (data?.detail ?? JSON.stringify(data)), 'error');
-        }
-    };
-
-    fetchRequests();
-}
 
 const logoutBtn = document.getElementById("logout-btn");
 if (logoutBtn) {
@@ -225,6 +169,7 @@ export async function renderItems(statusFilter?: string) {
     try {
         const items = await fetchItems(statusFilter);
         
+        // Painel CLINICAL: somente leitura — sem coluna de ações
         if (medicalTbody) {
             medicalTbody.innerHTML = "";
             items.forEach((item: Device) => {
@@ -237,7 +182,7 @@ export async function renderItems(statusFilter?: string) {
                 } else {
                     statusOrQtyHtml = `${item.quantity}`;
                 }
-                
+
                 medicalTbody.innerHTML += `
                     <tr>
                         <td>${item.name}</td>
@@ -248,7 +193,8 @@ export async function renderItems(statusFilter?: string) {
                 `;
             });
         }
-        
+
+        // Painel ADMIN: armazena itens no deviceMap para o modal de edição acessar por id, e exibe botões de ação
         if (adminTbody) {
             adminTbody.innerHTML = "";
             deviceMap.clear();
@@ -457,6 +403,7 @@ if (editModal && editForm && editCancelBtn) {
     }
 };
 
+// Identifica qual página está carregada pelo ID único de cada tbody e aplica o guard correspondente
 if (document.getElementById("devices-tbody")) requireClinical();
 if (document.getElementById("admin-devices-tbody")) requireAdmin();
 

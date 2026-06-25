@@ -43,26 +43,18 @@
     </style>
 </head>
 <body>
-    <header class="dashboard-header">
-        <div class="container">
-            <h2>Painel Administrador</h2>
-            <button id="logout-btn" class="btn btn-sm" style="background: transparent; border: 1px solid white; color: white;">Sair</button>
+    <div class="header" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <div>
+            <h2 style="margin: 0; color: #333;">Painel do Engenheiro</h2>
+            <nav style="margin-top: 10px;">
+                <a href="admin-dashboard.html" style="margin-right: 15px; font-weight: bold; color: var(--primary-blue); text-decoration: none;">Gestão de Inventário</a>
+                <a href="users-dashboard.html" style="color: #666; text-decoration: none;">Gestão de Usuários</a>
+            </nav>
         </div>
-    </header>
+        <button id="logout-btn" class="btn btn-danger">Sair</button>
+    </div>
+
     <main class="container dashboard-content">
-        <h3>Solicitações de Reset de Senha</h3>
-        <table class="shadow" style="border-radius: var(--border-radius); overflow: hidden;">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>E-mail</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="reset-requests-tbody">
-                <!-- Linhas preenchidas via TS -->
-            </tbody>
-        </table>
         
         <h3 style="margin-top: 3rem;">Gestão de Inventário</h3>
         <div class="tabs" style="margin-bottom: 1rem; border-bottom: 1px solid #ddd; display: flex; gap: 1rem;">
