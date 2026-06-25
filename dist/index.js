@@ -19,7 +19,7 @@ if (loginForm) {
         const password = passwordInput.value;
         try {
             // /api/token/ retorna access, refresh, role (ADMIN|CLINICAL) e must_change_password
-            const response = yield fetch("http://localhost:8000/api/token/", {
+            const response = yield fetch("https://lucasfalopes.pythonanywhere.com/api/token/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -64,7 +64,7 @@ if (forgotPasswordForm) {
         e.preventDefault();
         const emailInput = document.getElementById("email");
         try {
-            const response = yield fetch("http://localhost:8000/api/users/reset-request/", {
+            const response = yield fetch("https://lucasfalopes.pythonanywhere.com/api/users/reset-request/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: emailInput.value })
@@ -94,7 +94,7 @@ if (forceChangePasswordForm) {
         const newPass = document.getElementById("new_password").value;
         const token = localStorage.getItem("access_token");
         try {
-            const response = yield fetch("http://localhost:8000/api/users/change-password/", {
+            const response = yield fetch("https://lucasfalopes.pythonanywhere.com/api/users/change-password/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -130,12 +130,17 @@ let activeTab = 'devices';
 export function fetchItems(status) {
     return __awaiter(this, void 0, void 0, function* () {
         const token = localStorage.getItem("access_token");
-        const url = new URL(`http://localhost:8000/api/${activeTab}/`);
+        const url = new URL(`https://lucasfalopes.pythonanywhere.com/api/${activeTab}/`);
         if (status && activeTab === 'devices')
             url.searchParams.set("status", status);
         const response = yield fetch(url.toString(), {
             headers: { "Authorization": `Bearer ${token}` }
         });
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "index.html";
+            return [];
+        }
         if (!response.ok) {
             throw new Error(`Erro ao buscar ${activeTab}`);
         }
@@ -296,7 +301,7 @@ if (editModal && editForm && editCancelBtn) {
         }
         const token = localStorage.getItem("access_token");
         try {
-            const response = yield fetch(`http://localhost:8000/api/${activeTab}/${id}/`, {
+            const response = yield fetch(`https://lucasfalopes.pythonanywhere.com/api/${activeTab}/${id}/`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -360,7 +365,7 @@ window.deleteDevice = (id) => __awaiter(void 0, void 0, void 0, function* () {
         return;
     const token = localStorage.getItem("access_token");
     try {
-        const response = yield fetch(`http://localhost:8000/api/${activeTab}/${id}/`, {
+        const response = yield fetch(`https://lucasfalopes.pythonanywhere.com/api/${activeTab}/${id}/`, {
             method: "DELETE",
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -448,7 +453,7 @@ if (addModal && addBtn && addForm && addCancelBtn) {
         }
         const token = localStorage.getItem("access_token");
         try {
-            const response = yield fetch(`http://localhost:8000/api/${activeTab}/`, {
+            const response = yield fetch(`https://lucasfalopes.pythonanywhere.com/api/${activeTab}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

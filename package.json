@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Frontend do Sistema de Gerenciamento de Ativos e Dispositivos Hospitalares",
   "scripts": {
-    "build": "tsc",
     "watch": "tsc -w",
     "start": "npx http-server -c-1 -p 3000"
   },
