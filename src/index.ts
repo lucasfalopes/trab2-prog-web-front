@@ -1,5 +1,6 @@
 import { requireAdmin, requireClinical } from './router.js';
 import { showToast } from './toast.js';
+import { API_BASE } from './auth.js';
 
 const loginForm = document.getElementById("login-form") as HTMLFormElement;
 
@@ -15,7 +16,7 @@ if (loginForm) {
 
         try {
             // /api/token/ retorna access, refresh, role (ADMIN|CLINICAL) e must_change_password
-            const response = await fetch("http://localhost:8000/api/token/", {
+            const response = await fetch(`${API_BASE}/token/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -61,7 +62,7 @@ if (forgotPasswordForm) {
         e.preventDefault();
         const emailInput = document.getElementById("email") as HTMLInputElement;
         try {
-            const response = await fetch("http://localhost:8000/api/users/reset-request/", {
+            const response = await fetch(`${API_BASE}/users/reset-request/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: emailInput.value })
@@ -90,7 +91,7 @@ if (forceChangePasswordForm) {
         const token = localStorage.getItem("access_token");
         
         try {
-            const response = await fetch("http://localhost:8000/api/users/change-password/", {
+            const response = await fetch(`${API_BASE}/users/change-password/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -144,7 +145,7 @@ let activeTab: 'devices' | 'utensils' = 'devices';
 
 export async function fetchItems(status?: string): Promise<Device[]> {
     const token = localStorage.getItem("access_token");
-    const url = new URL(`http://localhost:8000/api/${activeTab}/`);
+    const url = new URL(`${API_BASE}/${activeTab}/`);
     if (status && activeTab === 'devices') url.searchParams.set("status", status);
     const response = await fetch(url.toString(), {
         headers: { "Authorization": `Bearer ${token}` }
@@ -312,7 +313,7 @@ if (editModal && editForm && editCancelBtn) {
 
         const token = localStorage.getItem("access_token");
         try {
-            const response = await fetch(`http://localhost:8000/api/${activeTab}/${id}/`, {
+            const response = await fetch(`${API_BASE}/${activeTab}/${id}/`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -375,7 +376,7 @@ if (editModal && editForm && editCancelBtn) {
 
     const token = localStorage.getItem("access_token");
     try {
-        const response = await fetch(`http://localhost:8000/api/${activeTab}/${id}/`, {
+        const response = await fetch(`${API_BASE}/${activeTab}/${id}/`, {
             method: "DELETE",
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -466,7 +467,7 @@ if (addModal && addBtn && addForm && addCancelBtn) {
 
         const token = localStorage.getItem("access_token");
         try {
-            const response = await fetch(`http://localhost:8000/api/${activeTab}/`, {
+            const response = await fetch(`${API_BASE}/${activeTab}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

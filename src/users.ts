@@ -1,5 +1,6 @@
 import { requireAdmin } from './router.js';
 import { showToast } from './toast.js';
+import { API_BASE } from './auth.js';
 
 // Página exclusiva de ADMIN — redireciona qualquer outro perfil imediatamente
 requireAdmin();
@@ -20,7 +21,7 @@ if (resetRequestsTbody) {
     const fetchRequests = async () => {
         const token = localStorage.getItem("access_token");
         try {
-            const response = await fetch("http://localhost:8000/api/admin/reset-requests/", {
+            const response = await fetch(`${API_BASE}/admin/reset-requests/`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (response.ok) {
@@ -54,7 +55,7 @@ if (resetRequestsTbody) {
 
     (window as any).handleResetAction = async (id: number, action: string) => {
         const token = localStorage.getItem("access_token");
-        const response = await fetch(`http://localhost:8000/api/admin/reset-requests/${id}/action/`, {
+        const response = await fetch(`${API_BASE}/admin/reset-requests/${id}/action/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -127,7 +128,7 @@ if (createUserModal && createUserBtn && createUserForm && createUserCancelBtn) {
             password:   (document.getElementById("create-user-password") as HTMLInputElement).value,
         };
         try {
-            const response = await fetch("http://localhost:8000/api/admin/users/", {
+            const response = await fetch(`${API_BASE}/admin/users/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -160,7 +161,7 @@ if (usersTbody) {
     const fetchUsers = async () => {
         const token = localStorage.getItem("access_token");
         try {
-            const response = await fetch("http://localhost:8000/api/admin/users/", {
+            const response = await fetch(`${API_BASE}/admin/users/`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (response.ok) {
@@ -193,7 +194,7 @@ if (usersTbody) {
         if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
         const token = localStorage.getItem("access_token");
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/users/${id}/`, {
+            const response = await fetch(`${API_BASE}/admin/users/${id}/`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -233,7 +234,7 @@ if (usersTbody) {
 
             const token = localStorage.getItem("access_token");
             try {
-                const response = await fetch(`http://localhost:8000/api/admin/users/${id}/`, {
+                const response = await fetch(`${API_BASE}/admin/users/${id}/`, {
                     method: "PATCH",
                     headers: {
                         "Content-Type": "application/json",

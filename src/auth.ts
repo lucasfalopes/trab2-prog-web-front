@@ -4,7 +4,7 @@ const REFRESH_KEY = 'refresh_token';
 const ROLE_KEY = 'user_role';
 const USERNAME_KEY = 'username';
 
-export const API_BASE = 'http://localhost:8000/api';
+export const API_BASE = 'https://lucasfalopes.pythonanywhere.com/api';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
