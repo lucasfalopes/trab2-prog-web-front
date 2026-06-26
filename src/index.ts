@@ -11,7 +11,7 @@ if (loginForm) {
         const usernameInput = document.getElementById("username") as HTMLInputElement;
         const passwordInput = document.getElementById("password") as HTMLInputElement;
 
-        const username = usernameInput.value;
+        const username = usernameInput.value.trim();
         const password = passwordInput.value;
 
         try {
