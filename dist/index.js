@@ -15,7 +15,7 @@ if (loginForm) {
         e.preventDefault();
         const usernameInput = document.getElementById("username");
         const passwordInput = document.getElementById("password");
-        const username = usernameInput.value;
+        const username = usernameInput.value.trim();
         const password = passwordInput.value;
         try {
             // /api/token/ retorna access, refresh, role (ADMIN|CLINICAL) e must_change_password

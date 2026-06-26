@@ -71,8 +71,9 @@ if (resetRequestsTbody) {
                 if (modal && display) {
                     display.innerText = data.temporary_password;
                     modal.style.display = "flex";
-                } else {
-                    showToast(`Aprovado! Senha temporária: ${data.temporary_password}`, 'success', 12000);
+                }
+                if (data.temporary_password) {
+                    prompt("Senha temporária (Copie o texto abaixo):", data.temporary_password);
                 }
             } else {
                 showToast("Solicitação recusada com sucesso.", 'info');
